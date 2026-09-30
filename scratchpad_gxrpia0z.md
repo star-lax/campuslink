@@ -1,0 +1,29 @@
+# Verification Plan for CAMPUSLINK
+
+- [ ] 1. Dashboard (`/`)
+  - KPI metrics
+  - Readiness breakdown pie chart
+  - Priority interventions
+  - Drive timeline
+  - Recruiter momentum table
+- [ ] 2. Students (`/students`)
+  - Search filter
+  - Student detail drawer (readiness radar chart, details)
+- [ ] 3. Matching Studio (`/matching`)
+  - JD selector
+  - Candidate match score cards (radar/breakdown)
+  - Shortlist toggles
+- [ ] 4. Drive Calendar (`/calendar`)
+  - Calendar view
+  - Conflicts list
+  - Schedule Optimizer
+- [ ] 5. Offers page (`/offers`)
+  - Offers table
+  - Status filters
+  - CTC breakdown
+- [ ] 6. Analytics page (`/analytics`)
+  - Branch conversion charts
+  - Salary distribution
+  - Analytics cards
+- [ ] 7. Notifications (`/notifications`) & Settings (`/settings`)
+  - Verify page render & features

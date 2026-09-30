@@ -1,0 +1,819 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Editorial Brutalist Design Tokens ───────────────────────── */
+:root {
+  /* Strict Global Color Palette */
+  --bg-base:        #F4F4F0; /* Bone / Off-White */
+  --bg-surface:     #F4F4F0;
+  --bg-elevated:    #F4F4F0;
+  --bg-muted:       #EAEAE4;
+  --bg-card:        #F4F4F0;
+  --bg-hover:       #EAEAE4;
+  --bg-input:       #F4F4F0;
+  --bg-inverted:    #111111; /* Deep Charcoal */
+
+  /* Text & Primary Elements */
+  --text-primary:   #111111;
+  --text-secondary: #444444;
+  --text-tertiary:  #666666;
+  --text-disabled:  #888888;
+  --text-inverted:  #F4F4F0;
+
+  /* Accent Color: Burnt Orange / Rust */
+  --accent-rust:     #C84B31;
+  --accent-rust-dark:#9E321B;
+
+  /* Borders & Dividers */
+  --border-default: #111111;
+  --border-subtle:  #111111;
+  --border-thick:   2px solid #111111;
+
+  /* Hard Brutalist Shadows */
+  --shadow-brutal-sm: 2px 2px 0px 0px #111111;
+  --shadow-brutal:    4px 4px 0px 0px #111111;
+  --shadow-brutal-lg: 6px 6px 0px 0px #111111;
+  --shadow-brutal-rust: 4px 4px 0px 0px #C84B31;
+
+  /* Structural Dimensions */
+  --sidebar-w: 264px;
+  --topbar-h:  64px;
+}
+
+/* ─── Base Reset ─────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-radius: 0px !important; /* Strict anti-pill constraint */
+}
+
+html {
+  font-size: 15px;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── Typography Defaults ────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Space Grotesk', -apple-system, sans-serif;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.font-editorial-serif {
+  font-family: 'Newsreader', Georgia, serif;
+}
+
+.font-mono-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum';
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* ─── Hard Scrollbar ────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-muted);
+  border-left: 1px solid var(--border-default);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-primary);
+  border: 1px solid var(--border-default);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-rust);
+}
+
+/* ─── Focus States ──────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent-rust) !important;
+  outline-offset: 2px;
+}
+
+/* ─── Structural Layout ─────────────────────────── */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--bg-base);
+  border-right: 2px solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  z-index: 40;
+  overflow: hidden;
+}
+
+.nav-group-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding: 0 16px;
+  margin: 18px 0 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  margin: 2px 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+  color: var(--text-primary);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  background: transparent;
+}
+
+.nav-item:hover {
+  background: var(--bg-muted);
+  border-color: var(--border-default);
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0px 0px var(--border-default);
+}
+
+.nav-item.active {
+  background: var(--bg-inverted);
+  color: var(--text-inverted);
+  border-color: var(--border-default);
+  box-shadow: 3px 3px 0px 0px var(--accent-rust);
+}
+
+.nav-item.active .nav-icon {
+  color: var(--text-inverted);
+}
+
+.topbar {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-w);
+  right: 0;
+  height: var(--topbar-h);
+  background: var(--bg-base);
+  border-bottom: 2px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  gap: 14px;
+  z-index: 30;
+}
+
+.main-content {
+  margin-left: var(--sidebar-w);
+  padding-top: var(--topbar-h);
+  min-height: 100vh;
+  background: var(--bg-base);
+}
+
+.page-container {
+  padding: 36px 40px 60px;
+  max-width: 1680px;
+}
+
+/* ─── Page Header ───────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--border-default);
+  gap: 20px;
+}
+
+.page-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--text-primary);
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.page-subtitle {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  line-height: 1.5;
+  font-weight: 500;
+  max-width: 800px;
+}
+
+/* ─── Brutalist Cards ───────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 2px solid var(--border-default);
+  box-shadow: var(--shadow-brutal);
+  overflow: hidden;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.card:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-brutal-lg);
+}
+
+.card-padded {
+  padding: 24px 28px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: var(--bg-base);
+  border-bottom: 2px solid var(--border-default);
+}
+
+.card-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.card-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+/* ─── Brutalist Stat Card ───────────────────────── */
+.stat-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border-default);
+  box-shadow: var(--shadow-brutal);
+  padding: 24px;
+  position: relative;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.stat-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-brutal-lg);
+}
+
+.stat-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+}
+
+.stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.stat-delta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 10px;
+  padding: 2px 6px;
+  border: 1px solid var(--border-default);
+  background: var(--bg-muted);
+}
+
+.stat-delta.positive {
+  background: var(--bg-inverted);
+  color: var(--text-inverted);
+}
+
+.stat-delta.negative {
+  background: var(--accent-rust);
+  color: var(--text-inverted);
+}
+
+.stat-delta.neutral {
+  background: var(--bg-muted);
+  color: var(--text-primary);
+}
+
+/* ─── Brutalist Badges ──────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border: 1px solid var(--border-default);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.badge-inverted {
+  background: var(--bg-inverted);
+  color: var(--text-inverted);
+  border-color: var(--border-default);
+}
+
+.badge-rust {
+  background: var(--accent-rust);
+  color: var(--text-inverted);
+  border-color: var(--border-default);
+}
+
+.badge-muted {
+  background: var(--bg-muted);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+/* ─── Brutalist High-Contrast Tables ────────────── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid var(--border-default);
+}
+
+.data-table thead tr {
+  background: var(--bg-inverted);
+  border-bottom: 2px solid var(--border-default);
+}
+
+.data-table th {
+  color: var(--text-inverted);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 14px 18px;
+  text-align: left;
+  border-right: 1px solid #333333;
+  white-space: nowrap;
+}
+
+.data-table th:last-child {
+  border-right: none;
+}
+
+.data-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-default);
+  border-right: 1px solid #D8D8D0;
+  color: var(--text-primary);
+  font-size: 13.5px;
+  vertical-align: middle;
+  background: var(--bg-base);
+}
+
+.data-table td:last-child {
+  border-right: none;
+}
+
+.data-table tbody tr:hover td {
+  background: var(--bg-muted);
+}
+
+/* ─── Brutalist Inputs ──────────────────────────── */
+.input-base {
+  background: var(--bg-input);
+  border: 2px solid var(--border-default);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 10px 14px;
+  outline: none;
+  width: 100%;
+  transition: box-shadow 0.12s ease;
+}
+
+.input-base::placeholder {
+  color: var(--text-disabled);
+}
+
+.input-base:focus {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-brutal-sm);
+}
+
+/* ─── Brutalist Buttons ─────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border: 2px solid var(--border-default);
+  outline: none;
+  white-space: nowrap;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.btn-sm {
+  padding: 7px 14px;
+  font-size: 12px;
+}
+
+.btn-xs {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
+/* Burnt Orange / Rust Primary CTA */
+.btn-primary {
+  background: var(--accent-rust);
+  color: var(--text-inverted);
+  box-shadow: var(--shadow-brutal-sm);
+}
+
+.btn-primary:hover {
+  background: var(--accent-rust-dark);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-brutal);
+}
+
+.btn-primary:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px 0px var(--border-default);
+}
+
+/* Bone / Solid Outline Secondary */
+.btn-outline {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-brutal-sm);
+}
+
+.btn-outline:hover {
+  background: var(--bg-inverted);
+  color: var(--text-inverted);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-brutal);
+}
+
+.btn-outline:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px 0px var(--border-default);
+}
+
+/* Inverted Dark Button */
+.btn-dark {
+  background: var(--bg-inverted);
+  color: var(--text-inverted);
+  box-shadow: var(--shadow-brutal-sm);
+}
+
+.btn-dark:hover {
+  background: #252525;
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-brutal);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-primary);
+}
+
+.btn-ghost:hover {
+  background: var(--bg-muted);
+  border-color: var(--border-default);
+}
+
+.btn-danger {
+  background: var(--accent-rust);
+  color: var(--text-inverted);
+  box-shadow: var(--shadow-brutal-sm);
+}
+
+/* ─── Role Chips ────────────────────────────────── */
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid var(--border-default);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.role-chip:hover {
+  background: var(--bg-muted);
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0px 0px var(--border-default);
+}
+
+.role-chip.active {
+  background: var(--bg-inverted);
+  color: var(--text-inverted);
+  box-shadow: 2px 2px 0px 0px var(--accent-rust);
+}
+
+/* ─── Filter Chips ──────────────────────────────── */
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--border-default);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  white-space: nowrap;
+}
+
+.filter-chip:hover {
+  background: var(--bg-muted);
+}
+
+.filter-chip.active {
+  background: var(--bg-inverted);
+  color: var(--text-inverted);
+  box-shadow: 2px 2px 0px 0px var(--border-default);
+}
+
+/* ─── Tabs ──────────────────────────────────────── */
+.tab-bar {
+  display: flex;
+  border: 2px solid var(--border-default);
+  background: var(--bg-base);
+  box-shadow: var(--shadow-brutal-sm);
+}
+
+.tab-item {
+  padding: 9px 18px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  color: var(--text-primary);
+  border: none;
+  background: none;
+  border-right: 1px solid var(--border-default);
+  transition: background 0.1s ease;
+}
+
+.tab-item:last-child {
+  border-right: none;
+}
+
+.tab-item:hover {
+  background: var(--bg-muted);
+}
+
+.tab-item.active {
+  background: var(--bg-inverted);
+  color: var(--text-inverted);
+}
+
+/* ─── Modal & Drawer ────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 17, 17, 0.7);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-panel {
+  background: var(--bg-base);
+  border: 3px solid var(--border-default);
+  box-shadow: var(--shadow-brutal-lg);
+  width: 100%;
+  max-width: 580px;
+}
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 17, 17, 0.7);
+  z-index: 50;
+}
+
+.drawer-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--bg-base);
+  border-left: 3px solid var(--border-default);
+  box-shadow: -6px 0px 0px 0px var(--border-default);
+  z-index: 51;
+  overflow-y: auto;
+}
+
+/* ─── Toast ─────────────────────────────────────── */
+.toast {
+  background: var(--bg-base);
+  border: 2px solid var(--border-default);
+  padding: 14px 18px;
+  box-shadow: var(--shadow-brutal);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 290px;
+  max-width: 400px;
+  color: var(--text-primary);
+}
+
+/* ─── Progress Bar (Sharp Brutalist) ────────────── */
+.progress-track {
+  width: 100%;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-default);
+  height: 8px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--bg-inverted);
+  transition: width 0.3s ease;
+}
+
+.progress-fill-rust {
+  background: var(--accent-rust);
+}
+
+/* ─── Recharts Tooltip & Grid Overrides ─────────── */
+.recharts-tooltip-wrapper {
+  z-index: 100 !important;
+}
+
+.recharts-default-tooltip {
+  background: var(--bg-base) !important;
+  border: 2px solid var(--border-default) !important;
+  box-shadow: var(--shadow-brutal) !important;
+  border-radius: 0px !important;
+  padding: 10px 14px !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+}
+
+.recharts-tooltip-label {
+  color: var(--text-primary) !important;
+  font-weight: 800 !important;
+  font-size: 12px !important;
+  text-transform: uppercase !important;
+}
+
+.recharts-tooltip-item {
+  color: var(--text-secondary) !important;
+  font-size: 12.5px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+.recharts-cartesian-axis-tick-value {
+  fill: var(--text-primary) !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: #D0D0C8 !important;
+  stroke-dasharray: 2 2 !important;
+}
+
+.recharts-legend-item-text {
+  color: var(--text-primary) !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+
+.recharts-polar-angle-axis-tick-value {
+  fill: var(--text-primary) !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+.recharts-polar-grid-concentric-polygon {
+  stroke: #C0C0B8 !important;
+}
+
+/* ─── Editorial Section Dividers ────────────────── */
+.editorial-rule {
+  border: none;
+  border-top: 2px solid var(--border-default);
+  margin: 28px 0;
+}
+
+.editorial-rule-thin {
+  border: none;
+  border-top: 1px solid var(--border-default);
+  margin: 16px 0;
+}
+
+.editorial-kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent-rust);
+  margin-bottom: 4px;
+}
+
+/* ─── Live Indicator (Brutalist Square) ─────────── */
+.live-square {
+  width: 9px;
+  height: 9px;
+  background: var(--accent-rust);
+  border: 1px solid var(--border-default);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ─── Info Row ──────────────────────────────────── */
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #D5D5CC;
+  gap: 12px;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-key {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.info-value {
+  font-size: 13.5px;
+  color: var(--text-primary);
+  font-weight: 700;
+  text-align: right;
+}
