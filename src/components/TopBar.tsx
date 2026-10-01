@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Bell, ChevronDown, Building2, User, Shield, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { notifications } from '@/data/notifications';
 import { useNavigate } from 'react-router-dom';
+import { apiClient } from '@/services/apiClient';
+import type { Notification } from '@/types';
 
 type AppRole = 'admin' | 'teacher' | 'student';
 
@@ -37,8 +39,10 @@ function SearchBar() {
 
 export function TopBar({ role, onRoleChange }: TopBarProps) {
   const [showRoleMenu, setShowRoleMenu] = useState(false);
+  const [apiUnread, setApiUnread] = useState<number | null>(null);
   const navigate = useNavigate();
-  const unread = notifications.filter(n => !n.read).length;
+  useEffect(() => { apiClient<Notification[]>('/notifications?read=false').then(result => setApiUnread(result.data.length)).catch(() => setApiUnread(null)); }, []);
+  const unread = apiUnread ?? notifications.filter(n => !n.read).length;
   const current = roles.find(r => r.value === role)!;
   const CurrentIcon = current.icon;
 

@@ -1,0 +1,1 @@
+export function validateFilters(query) { if (query.graduationYear && !/^\d{4}$/.test(query.graduationYear)) { const e = new Error('Invalid graduationYear'); e.statusCode = 400; throw e; } return query; }

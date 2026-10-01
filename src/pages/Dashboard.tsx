@@ -116,7 +116,7 @@ export function Dashboard() {
   const [, setResolved] = useState<string[]>([]);
 
   return (
-    <div>
+    <div className="dashboard-page">
       {/* ── Page header ───────────────────────────── */}
       <div className="page-header">
         <div>
@@ -142,7 +142,7 @@ export function Dashboard() {
       </div>
 
       {/* ── KPI Strip ────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16, marginBottom: 24 }}>
+      <div className="dashboard-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16, marginBottom: 24 }}>
         {kpis.map((k, i) => (
           <motion.div
             key={k.label}
@@ -156,7 +156,7 @@ export function Dashboard() {
       </div>
 
       {/* ── Row 2: Readiness + Priority Interventions ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 20, marginBottom: 20 }}>
+      <div className="dashboard-readiness-grid" style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 20, marginBottom: 20 }}>
 
         {/* Readiness Distribution */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
@@ -288,7 +288,7 @@ export function Dashboard() {
       </div>
 
       {/* ── Row 3: Drive Timeline + Offer Pipeline ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: 20, marginBottom: 20 }}>
+      <div className="dashboard-operations-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: 20, marginBottom: 20 }}>
 
         {/* Live drive timeline */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
@@ -422,7 +422,7 @@ export function Dashboard() {
       </div>
 
       {/* ── Row 4: Recruiter Momentum + AI Insight ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 20 }}>
+      <div className="dashboard-recruiter-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 20 }}>
 
         {/* Recruiter table */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>

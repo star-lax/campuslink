@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search, X, ChevronDown, Filter, ExternalLink, GraduationCap, BookOpen, Award } from 'lucide-react';
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, PolarRadiusAxis,
 } from 'recharts';
 import { students } from '@/data/students';
+import { apiClient } from '@/services/apiClient';
 import { drives } from '@/data/drives';
 import type { Student, Branch } from '@/types';
 import {
@@ -16,7 +17,12 @@ const bands = ['not-ready', 'developing', 'ready', 'highly-employable'] as const
 const statusOptions = ['unplaced', 'shortlisted', 'interviewing', 'offer-received', 'placed', 'opted-out'];
 
 /* ─── Student Drawer ──────────────────────────────── */
-function StudentDrawer({ student, onClose }: { student: Student; onClose: () => void }) {
+function StudentDrawer({ student: initialStudent, onClose }: { student: Student; onClose: () => void }) {
+  const [student, setStudent] = useState(initialStudent);
+  useEffect(() => {
+    setStudent(initialStudent);
+    apiClient<Partial<Student>>(`/readiness/${initialStudent.id}`).then(result => setStudent(current => ({ ...current, ...result.data }))).catch(() => undefined);
+  }, [initialStudent]);
   const radarData = student.skillScores.map(s => ({ skill: s.skill, score: s.score }));
   const eligibleDriveObjs = drives.filter(d => student.eligibleDrives.includes(d.id));
 
@@ -261,6 +267,9 @@ function StudentDrawer({ student, onClose }: { student: Student; onClose: () => 
 
 /* ─── Main Page ───────────────────────────────────── */
 export function Students() {
+  const [apiStudents, setApiStudents] = useState<Student[] | null>(null);
+  useEffect(() => { apiClient<Student[]>('/students').then(result => setApiStudents(result.data)).catch(() => setApiStudents(null)); }, []);
+  const studentSource = apiStudents?.length ? apiStudents : students;
   const [search, setSearch] = useState('');
   const [branchFilter, setBranchFilter] = useState<Branch | ''>('');
   const [bandFilter, setBandFilter] = useState<string>('');
@@ -270,7 +279,7 @@ export function Students() {
   const [selected, setSelected] = useState<Student | null>(null);
 
   const filtered = useMemo(() => {
-    let arr = [...students];
+    let arr = [...studentSource];
     if (search) {
       const q = search.toLowerCase();
       arr = arr.filter(s =>
@@ -290,7 +299,7 @@ export function Students() {
         : (av > bv ? -1 : av < bv ? 1 : 0);
     });
     return arr;
-  }, [search, branchFilter, bandFilter, statusFilter, sortKey, sortAsc]);
+  }, [studentSource, search, branchFilter, bandFilter, statusFilter, sortKey, sortAsc]);
 
   const toggleSort = (key: typeof sortKey) => {
     if (sortKey === key) setSortAsc(!sortAsc);
@@ -300,7 +309,7 @@ export function Students() {
   const hasFilters = branchFilter || bandFilter || statusFilter;
 
   return (
-    <div>
+    <div className="students-page">
       {/* Header */}
       <div className="page-header">
         <div>
@@ -315,7 +324,7 @@ export function Students() {
       </div>
 
       {/* Search & Filters bar */}
-      <div style={{
+      <div className="students-toolbar" style={{
         display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap',
         marginBottom: 22, padding: '16px 20px',
         background: 'var(--bg-card)',
@@ -388,7 +397,7 @@ export function Students() {
       </div>
 
       {/* Band summary chips */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 18, flexWrap: 'wrap' }}>
+      <div className="students-band-summary" style={{ display: 'flex', gap: 10, marginBottom: 18, flexWrap: 'wrap' }}>
         {bands.map(b => {
           const count = students.filter(s => s.readinessBand === b).length;
           const color = readinessBandColor(b);
@@ -421,7 +430,7 @@ export function Students() {
       </div>
 
       {/* Table */}
-      <div className="card" style={{ overflow: 'hidden' }}>
+      <div className="card students-table-card" style={{ overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table className="data-table" style={{ minWidth: 800 }}>
             <thead>
