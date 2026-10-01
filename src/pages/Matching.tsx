@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckSquare, Square, Star, AlertTriangle, ChevronRight } from 'lucide-react';
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
 } from 'recharts';
 import { jobs } from '@/data/jobs';
+import { apiClient } from '@/services/apiClient';
+import type { JobDescription } from '@/types';
 import { students } from '@/data/students';
 import { matchScores, getMatchesForJob } from '@/data/matches';
 
@@ -35,13 +37,18 @@ function ScoreRing({ score }: { score: number }) {
 }
 
 export function Matching() {
+  const [apiJobs, setApiJobs] = useState<JobDescription[] | null>(null);
+  const [apiMatches, setApiMatches] = useState<any[] | null>(null);
+  const availableJobs = apiJobs?.length ? apiJobs : jobs;
   const [selectedJobId, setSelectedJobId] = useState(jobs[0]?.id ?? '');
+  useEffect(() => { apiClient<JobDescription[]>('/jobs').then(result => setApiJobs(result.data)).catch(() => setApiJobs(null)); }, []);
+  useEffect(() => { if (!selectedJobId) return; apiClient<any[]>(`/matching/${selectedJobId}`).then(result => setApiMatches(result.data)).catch(() => setApiMatches(null)); }, [selectedJobId]);
   const [shortlisted, setShortlisted] = useState<Set<string>>(new Set());
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
 
-  const selectedJob = jobs.find(j => j.id === selectedJobId) ?? jobs[0];
-  const matches = getMatchesForJob(selectedJobId)
-    .map(m => ({ ...m, student: students.find(s => s.id === m.studentId) }))
+  const selectedJob = availableJobs.find(j => j.id === selectedJobId) ?? availableJobs[0];
+  const matches = (apiMatches?.length ? apiMatches : getMatchesForJob(selectedJobId))
+    .map(m => ({ ...m, overallScore: m.overallScore ?? m.totalScore, student: students.find(s => s.id === m.studentId) }))
     .filter(m => m.student)
     .sort((a, b) => b.overallScore - a.overallScore);
 
@@ -58,7 +65,7 @@ export function Matching() {
   };
 
   return (
-    <div>
+    <div className="matching-page">
       <div className="page-header">
         <div>
           <h1 className="page-title">Matching Studio</h1>
@@ -72,16 +79,16 @@ export function Matching() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr 380px', gap: 20, minHeight: 600 }}>
+      <div className="matching-workspace" style={{ display: 'grid', gridTemplateColumns: '300px 1fr 380px', gap: 20, minHeight: 600 }}>
 
         {/* ── JD List ─────────────────── */}
-        <div className="card" style={{ overflow: 'hidden' }}>
+        <div className="card matching-job-list" style={{ overflow: 'hidden' }}>
           <div className="card-header" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
             <div className="card-title">Job Descriptions</div>
-            <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{jobs.length} roles</span>
+            <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{availableJobs.length} roles</span>
           </div>
           <div style={{ overflowY: 'auto' }}>
-            {jobs.map(job => {
+            {availableJobs.map(job => {
               const isActive = job.id === selectedJobId;
               return (
                 <button
@@ -125,7 +132,7 @@ export function Matching() {
         </div>
 
         {/* ── Candidates ──────────────── */}
-        <div className="card" style={{ overflow: 'hidden' }}>
+        <div className="card matching-candidate-list" style={{ overflow: 'hidden' }}>
           {selectedJob && (
             <>
               <div className="card-header">
@@ -217,7 +224,7 @@ export function Matching() {
         </div>
 
         {/* ── Explainer Panel ──────────── */}
-        <div className="card" style={{ overflow: 'hidden' }}>
+        <div className="card matching-candidate-detail" style={{ overflow: 'hidden' }}>
           {selectedCandidate && selectedCandidate.student ? (
             <>
               <div className="card-header">

@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, CheckCircle2, Clock, XCircle, AlertTriangle, Download, ChevronDown } from 'lucide-react';
 import { offers } from '@/data/offers';
+import { apiClient } from '@/services/apiClient';
+import type { Offer } from '@/types';
 import { offerStageColor, offerStageLabel, formatDate } from '@/lib/utils';
 
 type Stage = 'all' | 'draft' | 'sent' | 'accepted' | 'joining-pending' | 'joined' | 'revoked';
@@ -16,26 +18,30 @@ const stageIcon = (stage: string) => {
 };
 
 export function Offers() {
+  const [apiOffers, setApiOffers] = useState<Offer[] | null>(null);
+  const availableOffers = apiOffers?.length ? apiOffers : offers;
+  useEffect(() => { apiClient<Offer[]>('/offers').then(result => setApiOffers(result.data)).catch(() => setApiOffers(null)); }, []);
   const [stageFilter, setStageFilter] = useState<Stage>('all');
-  const [selected, setSelected] = useState(offers[0] ?? null);
+  const [selected, setSelected] = useState<Offer>(availableOffers[0] ?? offers[0]);
+  useEffect(() => { if (availableOffers.length && !availableOffers.some(o => o.id === selected?.id)) setSelected(availableOffers[0]); }, [availableOffers, selected?.id]);
 
   const filtered = stageFilter === 'all'
-    ? offers
-    : offers.filter(o => o.stage === stageFilter);
+    ? availableOffers
+    : availableOffers.filter(o => o.stage === stageFilter);
 
   const stageCounts = Object.fromEntries(
-    stages.map(s => [s, s === 'all' ? offers.length : offers.filter(o => o.stage === s).length])
+    stages.map(s => [s, s === 'all' ? availableOffers.length : availableOffers.filter(o => o.stage === s).length])
   );
 
   const kpis = [
-    { label: 'Total Offers',   value: offers.length,                           color: '#3B82F6' },
-    { label: 'Accepted',       value: offers.filter(o=>o.stage==='accepted').length, color: '#10B981' },
-    { label: 'Pending',        value: offers.filter(o=>['draft','sent','joining-pending'].includes(o.stage)).length, color: '#F59E0B' },
-    { label: 'Revoked',        value: offers.filter(o=>o.stage==='revoked').length, color: '#F43F5E' },
+    { label: 'Total Offers',   value: availableOffers.length,                           color: '#3B82F6' },
+    { label: 'Accepted',       value: availableOffers.filter(o=>o.stage==='accepted').length, color: '#10B981' },
+    { label: 'Pending',        value: availableOffers.filter(o=>['draft','sent','joining-pending'].includes(o.stage)).length, color: '#F59E0B' },
+    { label: 'Revoked',        value: availableOffers.filter(o=>o.stage==='revoked').length, color: '#F43F5E' },
   ];
 
   return (
-    <div>
+    <div className="offers-page">
       <div className="page-header">
         <div>
           <h1 className="page-title">Offer Tracker</h1>
@@ -45,7 +51,7 @@ export function Offers() {
       </div>
 
       {/* KPI strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+      <div className="offers-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
         {kpis.map(k => (
           <div key={k.label} className="stat-card" style={{ '--accent-color': k.color } as React.CSSProperties}>
             <div className="stat-value num" style={{ color: k.color }}>{k.value}</div>
@@ -55,7 +61,7 @@ export function Offers() {
       </div>
 
       {/* Stage filter chips */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+      <div className="offers-stage-filter" style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         {stages.map(s => {
           const isActive = stageFilter === s;
           const color = s === 'all' ? '#4E6380' : offerStageColor(s);
@@ -88,10 +94,10 @@ export function Offers() {
         })}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: 20 }}>
+      <div className="offers-workspace" style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: 20 }}>
 
         {/* ── Offers table ─────────────── */}
-        <div className="card" style={{ overflow: 'hidden' }}>
+        <div className="card offers-table-card" style={{ overflow: 'hidden' }}>
           <div style={{ overflowX: 'auto' }}>
             <table className="data-table" style={{ minWidth: 620 }}>
               <thead>
@@ -162,7 +168,7 @@ export function Offers() {
 
         {/* ── Offer detail ─────────────── */}
         {selected ? (
-          <div className="card" style={{ overflow: 'hidden' }}>
+          <div className="card offers-detail-card" style={{ overflow: 'hidden' }}>
             {/* Header stripe */}
             <div style={{ height: 4, background: offerStageColor(selected.stage) }} />
             <div style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: 22, overflowY: 'auto' }}>
@@ -244,7 +250,7 @@ export function Offers() {
             </div>
           </div>
         ) : (
-          <div className="card">
+          <div className="card offers-detail-card">
             <div className="empty-state"><FileText size={36} style={{ opacity: 0.2 }} /><div>Select an offer to view details</div></div>
           </div>
         )}

@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area, PieChart, Pie, Cell, LineChart, Line,
 } from 'recharts';
 import { TrendingUp, Download, BarChart3 } from 'lucide-react';
+import { apiClient } from '@/services/apiClient';
 
 /* ─── Data ─────────────────────────────────────── */
 const branchConversion = [
@@ -97,7 +98,7 @@ function ChartCard({ title, subtitle, children, action }: {
   title: string; subtitle?: string; children: React.ReactNode; action?: React.ReactNode;
 }) {
   return (
-    <div className="card">
+    <div className="card analytics-chart-card">
       <div className="card-header">
         <div>
           <div className="card-title">{title}</div>
@@ -120,29 +121,39 @@ const analyticsKPIs = [
 
 export function Analytics() {
   const [period, setPeriod] = useState<'season' | 'ytd' | 'all'>('season');
+  const [apiAnalytics, setApiAnalytics] = useState<any | null>(null);
+  useEffect(() => { apiClient<any>('/analytics').then(result => setApiAnalytics(result.data)).catch(() => setApiAnalytics(null)); }, []);
+  const kpis = apiAnalytics?.overview ? [
+    { label: 'Total Placed', value: String(apiAnalytics.overview.placedStudents), delta: `${apiAnalytics.overview.offerCount} offers`, color: '#10B981' },
+    { label: 'Placement Rate', value: `${apiAnalytics.overview.placementRate}%`, delta: `${apiAnalytics.overview.totalStudents} students`, color: '#3B82F6' },
+    { label: 'Highest Package', value: `₹${apiAnalytics.overview.highestPackage} LPA`, delta: 'Backend aggregate', color: '#8B5CF6' },
+    { label: 'Avg Package', value: `₹${apiAnalytics.overview.averagePackage}L`, delta: `${apiAnalytics.overview.acceptedOfferCount} accepted`, color: '#F59E0B' },
+  ] : analyticsKPIs;
 
   return (
-    <div>
+    <div className="analytics-page">
       <div className="page-header">
         <div>
           <h1 className="page-title">Placement Analytics</h1>
           <p className="page-subtitle">Conversion rates, salary trends, and skill-offer correlations</p>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          <div className="tab-bar">
+          <div className="analytics-controls">
+            <div className="tab-bar">
             {(['season', 'ytd', 'all'] as const).map(p => (
               <button key={p} className={`tab-item ${period === p ? 'active' : ''}`} onClick={() => setPeriod(p)}>
                 {p === 'season' ? 'This Season' : p === 'ytd' ? 'YTD' : 'All Time'}
               </button>
             ))}
+            </div>
           </div>
           <button className="btn btn-outline btn-sm"><Download size={14} /> Export</button>
         </div>
       </div>
 
       {/* KPI strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
-        {analyticsKPIs.map(k => (
+      <div className="analytics-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+        {kpis.map(k => (
           <div key={k.label} className="stat-card" style={{ '--accent-color': k.color } as React.CSSProperties}>
             <div className="stat-value num" style={{ color: k.color }}>{k.value}</div>
             <div className="stat-label" style={{ marginTop: 6 }}>{k.label}</div>
@@ -152,7 +163,7 @@ export function Analytics() {
       </div>
 
       {/* Row 1: Branch conversion + Salary distribution */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 20, marginBottom: 20 }}>
+      <div className="analytics-row analytics-row-wide" style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 20, marginBottom: 20 }}>
         <ChartCard title="Branch-wise Placement Rate" subtitle="Placed vs registered students per branch">
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={branchConversion} barSize={28}>
@@ -196,7 +207,7 @@ export function Analytics() {
       </div>
 
       {/* Row 2: Recruiter engagement + Skills */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
+      <div className="analytics-row analytics-row-even" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
         <ChartCard title="Recruiter Engagement Trend" subtitle="Companies and shortlists per month">
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={recruiterEngagement}>
@@ -236,7 +247,7 @@ export function Analytics() {
       </div>
 
       {/* Row 3: Funnel + At-risk + Skill-offer */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
+      <div className="analytics-row analytics-row-triple" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
         {/* Drive-to-offer funnel */}
         <ChartCard title="Drive-to-Offer Funnel" subtitle="Conversion at each stage">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 8 }}>

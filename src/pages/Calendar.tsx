@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, AlertTriangle, CheckCircle2, Clock, MapPin, Users, X, Zap } from 'lucide-react';
 import { drives, conflicts as allConflicts } from '@/data/drives';
+import { apiClient } from '@/services/apiClient';
+import type { PlacementDrive } from '@/types';
 
 /* ─── Helpers ───────────────────────────────────── */
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -34,7 +36,7 @@ function severityStyle(sev: string) {
 }
 
 /* ─── Drive popover ─────────────────────────────── */
-function DrivePopover({ drive, onClose }: { drive: typeof drives[0]; onClose: () => void }) {
+function DrivePopover({ drive, onClose }: { drive: PlacementDrive; onClose: () => void }) {
   const st = driveStatusStyle(drive.status);
   return (
     <div style={{
@@ -116,10 +118,13 @@ function DrivePopover({ drive, onClose }: { drive: typeof drives[0]; onClose: ()
 
 /* ─── Main ──────────────────────────────────────── */
 export function Calendar() {
+  const [apiDrives, setApiDrives] = useState<PlacementDrive[] | null>(null);
+  const availableDrives = apiDrives?.length ? apiDrives : drives;
+  useEffect(() => { apiClient<PlacementDrive[]>('/drives').then(result => setApiDrives(result.data)).catch(() => setApiDrives(null)); }, []);
   const today = new Date();
   const [year,  setYear ] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
-  const [selectedDrive, setSelectedDrive] = useState<typeof drives[0] | null>(null);
+  const [selectedDrive, setSelectedDrive] = useState<PlacementDrive | null>(null);
   const [showOptimizer, setShowOptimizer] = useState(false);
 
   const prevMonth = () => { if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1); };
@@ -128,7 +133,7 @@ export function Calendar() {
   const totalDays  = daysInMonth(year, month);
   const firstDay   = firstDayOfMonth(year, month);
 
-  const drivesThisMonth = drives.filter(d => {
+  const drivesThisMonth = availableDrives.filter(d => {
     const { y, m } = parseDate(d.date);
     return y === year && m === month;
   });
@@ -142,7 +147,7 @@ export function Calendar() {
   ];
 
   return (
-    <div>
+    <div className="calendar-page">
       <div className="page-header">
         <div>
           <h1 className="page-title">Drive Calendar</h1>
@@ -159,10 +164,10 @@ export function Calendar() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 20 }}>
+      <div className="calendar-workspace" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 20 }}>
 
         {/* ── Calendar ──────────────── */}
-        <div className="card" style={{ overflow: 'hidden' }}>
+        <div className="card calendar-surface" style={{ overflow: 'hidden' }}>
           {/* Month nav */}
           <div className="card-header">
             <button
@@ -245,7 +250,7 @@ export function Calendar() {
         {/* ── Sidebar: Conflicts + Drives ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Conflicts */}
-          <div className="card" style={{ overflow: 'hidden' }}>
+          <div className="card calendar-conflicts" style={{ overflow: 'hidden' }}>
             <div className="card-header">
               <div className="card-title">Conflicts</div>
               <span style={{
@@ -291,7 +296,7 @@ export function Calendar() {
           </div>
 
           {/* This month's drives */}
-          <div className="card" style={{ overflow: 'hidden' }}>
+          <div className="card calendar-drive-list" style={{ overflow: 'hidden' }}>
             <div className="card-header">
               <div className="card-title">{MONTHS[month]} Drives</div>
               <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{drivesThisMonth.length} scheduled</span>

@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, Send, CheckCheck, Info, AlertCircle, Users, Filter, X } from 'lucide-react';
 import { notifications as allNotifs } from '@/data/notifications';
+import { apiClient } from '@/services/apiClient';
+import type { Notification } from '@/types';
 import { formatRelative } from '@/lib/utils';
 
 type Category = 'all' | 'alert' | 'info' | 'action' | 'success';
@@ -29,7 +31,9 @@ const TEMPLATES = [
 ];
 
 export function Notifications() {
+  const [apiNotifs, setApiNotifs] = useState<Notification[] | null>(null);
   const [notifs, setNotifs] = useState(allNotifs.map(n => ({ ...n })));
+  useEffect(() => { apiClient<Notification[]>('/notifications').then(result => { if (result.data.length) { setApiNotifs(result.data); setNotifs(result.data); } }).catch(() => undefined); }, []);
   const [cat, setCat] = useState<Category>('all');
   const [showCompose, setShowCompose] = useState(false);
   const [composeMsg, setComposeMsg] = useState('');
@@ -38,11 +42,11 @@ export function Notifications() {
   const filtered = cat === 'all' ? notifs : notifs.filter(n => n.type === cat);
   const unread = notifs.filter(n => !n.read).length;
 
-  const markAllRead = () => setNotifs(prev => prev.map(n => ({ ...n, read: true })));
-  const markRead = (id: string) => setNotifs(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  const markAllRead = () => { setNotifs(prev => prev.map(n => ({ ...n, read: true }))); apiClient('/notifications/read-all', { method: 'PATCH' }).catch(() => undefined); };
+  const markRead = (id: string) => { setNotifs(prev => prev.map(n => n.id === id ? { ...n, read: true } : n)); apiClient(`/notifications/${id}/read`, { method: 'PATCH' }).catch(() => undefined); };
 
   return (
-    <div>
+    <div className="notifications-page">
       <div className="page-header">
         <div>
           <h1 className="page-title">Notifications</h1>
@@ -62,12 +66,12 @@ export function Notifications() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20 }}>
+      <div className="notifications-workspace" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20 }}>
 
         {/* ── Feed ─────────────────────── */}
         <div>
           {/* Category chips */}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' }}>
+          <div className="notifications-category-filter" style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' }}>
             {CATEGORIES.map(c => {
               const Icon = c.icon;
               const count = c.value === 'all' ? notifs.length : notifs.filter(n => n.type === c.value).length;
@@ -102,7 +106,7 @@ export function Notifications() {
           </div>
 
           {/* Notif list */}
-          <div className="card" style={{ overflow: 'hidden' }}>
+          <div className="card notifications-feed" style={{ overflow: 'hidden' }}>
             {filtered.length === 0 ? (
               <div className="empty-state"><Bell size={36} style={{ opacity: 0.2 }} /><div>No notifications in this category</div></div>
             ) : filtered.map((n, i) => {
@@ -169,7 +173,7 @@ export function Notifications() {
 
         {/* ── Quick compose panel ───────── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div className="card" style={{ overflow: 'hidden' }}>
+          <div className="card notifications-compose" style={{ overflow: 'hidden' }}>
             <div className="card-header">
               <div className="card-title">Quick Compose</div>
             </div>
@@ -215,7 +219,7 @@ export function Notifications() {
           </div>
 
           {/* Templates */}
-          <div className="card" style={{ overflow: 'hidden' }}>
+          <div className="card notifications-templates" style={{ overflow: 'hidden' }}>
             <div className="card-header">
               <div className="card-title">Templates</div>
             </div>

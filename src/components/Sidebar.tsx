@@ -1,10 +1,13 @@
 import { NavLink, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import {
   LayoutDashboard, Users, Zap, CalendarDays, FileText,
   BarChart3, Bell, Settings, Radio, GraduationCap,
   BookOpen, ClipboardList, Trophy, UserCheck,
 } from 'lucide-react';
 import { notifications } from '@/data/notifications';
+import { apiClient } from '@/services/apiClient';
+import type { Notification } from '@/types';
 
 type AppRole = 'admin' | 'teacher' | 'student';
 
@@ -68,7 +71,9 @@ const roleConfig = {
 
 export function Sidebar({ role }: SidebarProps) {
   const location = useLocation();
-  const unread = notifications.filter(n => !n.read).length;
+  const [apiUnread, setApiUnread] = useState<number | null>(null);
+  useEffect(() => { apiClient<Notification[]>('/notifications?read=false').then(result => setApiUnread(result.data.length)).catch(() => setApiUnread(null)); }, []);
+  const unread = apiUnread ?? notifications.filter(n => !n.read).length;
   const config = roleConfig[role];
 
   return (

@@ -1,0 +1,3 @@
+import { getStudentReadinessController, listReadinessController } from './readiness.controller.js';
+import { validateStudentId } from './readiness.validation.js';
+export const readinessRouter = { method: 'GET', matches: pathname => pathname === '/api/readiness' || /^\/api\/readiness\/[^/]+$/.test(pathname), handler: async ({ url }) => { const studentId = url.pathname.split('/')[3]; if (!studentId) return listReadinessController(); if (!validateStudentId(studentId)) { const error = new Error('Invalid student id'); error.statusCode = 400; throw error; } return getStudentReadinessController(studentId); } };
